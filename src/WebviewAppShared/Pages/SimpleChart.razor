@@ -69,7 +69,7 @@
             requestData.Payload.Add(new PageReplacementParameters
                 {
                     AlgorithmType = (AlgorithmType)SelectedAlgorithm,
-                    Pages = !string.IsNullOrEmpty(ReferenceString) ? ReferenceString.Select(x => (int)x).ToList() : new(),
+                    Pages = !string.IsNullOrEmpty(ReferenceString) ? ReferenceString.Split(',').Select(x => Convert.ToInt32(x)).ToList() : new(),
                     FrameSize = frameSizeOption
                 });
         }

@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System;
 using WebviewAppShared.Data.Models;
 
 namespace WebviewAppShared.Data.Services
 {
-    public class LifoService : PageReplacementParameters
+    public class FifoService : PageReplacementParameters
     {
-        public Stack<int> Items { get; set; } = new();
-        public void Add(int item)
-        {
-            Items.Push(item);
-        }
+        public Queue<int> Items { get; set; } = new();
 
         public void Replace(int item)
         {
             if (Items.Count >= FrameSize)
             {
-                Items.Pop();
+                Items.Dequeue();
             }
-            Items.Push(item);
+            Items.Enqueue(item);
         }
 
         public Result GetResult(RequestPayload inputData)
@@ -26,7 +22,7 @@ namespace WebviewAppShared.Data.Services
             Result result = new() { FrameSizePageFailRatioData = new(), RatioSummary = new() };
             foreach (var frameSizeOption in inputData.Payload)
             {
-                Items = new Stack<int>();
+                Items = new Queue<int>();
                 FrameSize = frameSizeOption.FrameSize;
 
                 int faults = 0;
@@ -38,6 +34,7 @@ namespace WebviewAppShared.Data.Services
                         faults++;
                         Replace(page);
                     }
+
                     hits++;
                 }
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
