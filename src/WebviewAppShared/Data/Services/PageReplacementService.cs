@@ -9,6 +9,9 @@ namespace WebviewAppShared.Data.Services
         private readonly FifoService _fifoService;
         private readonly LruService _lruService;
         private readonly CprService _cprService;
+        private readonly NruService _nruService;
+        private readonly RprService _rprService;
+        private readonly LrukService _lrukService;
 
         public PageReplacementService()
         {
@@ -16,6 +19,9 @@ namespace WebviewAppShared.Data.Services
             _fifoService = new();
             _lruService = new();
             _cprService = new();
+            _nruService = new();
+            _rprService = new();
+            _lrukService = new();
         }
 
         public Result GetGeneratedResult(RequestPayload requestPayload)
@@ -27,6 +33,9 @@ namespace WebviewAppShared.Data.Services
                 AlgorithmType.FIFO => _fifoService.GetResult(requestPayload),
                 AlgorithmType.LRU => _lruService.GetResult(requestPayload),
                 AlgorithmType.CPR => _cprService.GetResult(requestPayload),
+                AlgorithmType.NRU => _nruService.GetResult(requestPayload),
+                AlgorithmType.RPR => _rprService.GetResult(requestPayload),
+                AlgorithmType.LRUK => _lrukService.GetResult(requestPayload),
                 _ => null,
             };
         }
