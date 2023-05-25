@@ -8,6 +8,8 @@
         CPR = 4,
         NRU = 5,
         RPR = 6,
-        LRUK = 7
+        LRUK = 7,
+        ARC = 8,
+        TWOQ = 9
     }
 }

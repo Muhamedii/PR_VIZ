@@ -12,6 +12,8 @@ namespace WebviewAppShared.Data.Services
         private readonly NruService _nruService;
         private readonly RprService _rprService;
         private readonly LrukService _lrukService;
+        private readonly ArcService _arcService;
+        private readonly TwoqService _twoqService;
 
         public PageReplacementService()
         {
@@ -22,6 +24,8 @@ namespace WebviewAppShared.Data.Services
             _nruService = new();
             _rprService = new();
             _lrukService = new();
+            _arcService = new();
+            _twoqService = new();
         }
 
         public Result GetGeneratedResult(RequestPayload requestPayload)
@@ -36,6 +40,8 @@ namespace WebviewAppShared.Data.Services
                 AlgorithmType.NRU => _nruService.GetResult(requestPayload),
                 AlgorithmType.RPR => _rprService.GetResult(requestPayload),
                 AlgorithmType.LRUK => _lrukService.GetResult(requestPayload),
+                AlgorithmType.ARC => _arcService.GetResult(requestPayload),
+                AlgorithmType.TWOQ => _twoqService.GetResult(requestPayload),
                 _ => null,
             };
         }
