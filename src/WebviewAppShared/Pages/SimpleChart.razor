@@ -47,12 +47,21 @@
         </div>
     </div>
 </div>
+<div class="container">
+    @{
+        foreach (var item in PageFaultRates)
+        {
+            <p> For framesize @item.Key faultrate is: @item.Value %</p>
+        }
+    }
+</div>
 
 
 @code {
     private LineChart<int> lineChart;
     private PageReplacementService pageReplacementService = new();
     private RequestPayload requestData = new RequestPayload() { Payload = new() };
+    private Dictionary<int, decimal> PageFaultRates = new();
 
     private int SelectedAlgorithm { get; set; }
     private string ReferenceString { get; set; }
@@ -90,6 +99,7 @@
 
         await lineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())), GetChartDataSet(pageFaults));
 
+        PageFaultRates = GetPageFaultRateData(requestData.Payload.First().Pages.Count, response.FrameSizePageFailRatioData.ToList());
     }
     private LineChartDataset<int> GetChartDataSet(IEnumerable<int> faults)
     {
@@ -101,5 +111,15 @@
                 PointRadius = 3,
                 CubicInterpolationMode = "monotone"
             };
+    }
+    private Dictionary<int, decimal> GetPageFaultRateData(int pagesCount, List<Tuple<int, int>> frameSizePageFaults)
+    {
+        var result = new Dictionary<int, decimal>();
+        foreach (var tuple in frameSizePageFaults)
+        {
+            var faultRate = (decimal)(tuple.Item1 * 100) / pagesCount;
+            result.Add(tuple.Item2, Math.Round(faultRate, 2));
+        }
+        return result;
     }
 }

@@ -43,6 +43,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.RatioSummary.PageFaultRatio = (faults * 100) / frameSizeOption.Pages.Count;
             }
             return result;
         }
