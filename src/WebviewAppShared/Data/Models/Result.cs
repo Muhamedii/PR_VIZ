@@ -10,7 +10,8 @@ namespace WebviewAppShared.Data.Models
         /// Key (X axis): TotalHits per given frame size
         /// Value (Y axis): FrameSize selected
         /// </summary>
-        public List<Tuple<int,int>> FrameSizePageFailRatioData { get; set; }
+        public List<Tuple<int, int>> FrameSizePageFailRatioData { get; set; }
         public PageReplacementResult RatioSummary { get; set; }
+        public List<(List<int> CurrentItems, bool IsPageFound)> FrameState { get; set; }
     }
 }

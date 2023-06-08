@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System;
 using WebviewAppShared.Data.Models;
+using System.Linq;
 
 namespace WebviewAppShared.Data.Services
 {
     public class FifoService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         public Queue<int> Items { get; set; } = new();
 
         public void Replace(int item)
@@ -33,13 +35,19 @@ namespace WebviewAppShared.Data.Services
                     {
                         faults++;
                         Replace(page);
+                        ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
                     }
-
-                    hits++;
+                    else
+                    {
+                        hits++;
+                        ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
+                    }
+                        
                 }
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }
