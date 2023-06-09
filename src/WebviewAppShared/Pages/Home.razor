@@ -4,7 +4,7 @@
 
 <div class="container">
     <div class="algorithms-container">
-        <label for="algorithms">Choose algorithm:</label>
+        <label for="algorithms">Zgjdih nje algoritem:</label>
         <select id="algorithms" @bind="SelectedAlgorithm">
             @foreach (var option in Enum.GetValues(typeof(AlgorithmType)))
             {
@@ -13,11 +13,11 @@
         </select>
     </div>
     <div class="textfield-container">
-        <label for="referencestring">Write reference string:</label>
+        <label for="referencestring">Shkruaj vargun e faqeve (te ndare me presje):</label>
         <input type="text" id="referencestring" @bind="ReferenceString">
     </div>
     <div class="framesizeoption-container">
-        <label for="framesizeoption">Choose frame size:</label>
+        <label for="framesizeoption">Zgjidh madhesine e kornizes memorike:</label>
         <select id="framesizeoption" @bind="SelectedFrameSizeOption">
             @for (int i = 1; i < 10; i++)
             {
@@ -26,66 +26,49 @@
         </select>
     </div>
     <div class="button-container">
-        <button class="btn btn-primary" @onclick="BuildResults">Reset</button>
+        <button class="btn btn-primary" @onclick="BuildResults">Simulo procesin</button>
+        <button class="btn btn-secondary" @onclick="ResetData">Rivendos te dhenat</button>
     </div>
-    @*<div class="form-group">
-    <Label For="referencestring">Enter pages sequence:</Label>
-    <TextEdit @bind-Text="ReferenceString" id="referencestring" Class="form-control" Style="height: 25%" />
-    </div>
-
-    <div class="form-group">
-    <Label For="formData.">Select algorithm:</Label>
-    <Select TValue="int" @bind-SelectedValue="SelectedAlgorithm" id="selectedalgorithm" Class="form-control" Style="width: 70%;">
-    @foreach (var option in Enum.GetValues(typeof(AlgorithmType)))
-    {
-    <SelectItem Value="@option.GetHashCode()">@option</SelectItem>
-    }
-    </Select>
-    </div>
-
-    <div class="form-group">
-    <Label For="framesizeoptions">Select 1 or more framesize options:</Label>
-    <Select TValue="int" @bind-SelectedValues="SelectedFrameSizeOptions" Class="form-control" Style="width: 70%;" Multiple>
-    @for (int i = 1; i <= 10; i++)
-    {
-    int value = i;
-    <SelectItem Value="@i">@value</SelectItem>
-    }
-    </Select>
-    </div>*@
 </div>
 
 <div class="table-container">
-    <table class="table" style="width:300px">
-        <thead>
-            <tr>
-            @foreach (var column in ReferenceString.Split(','))
-            {
-            <th>@column</th>
-            }
-            </tr>
-        </thead>
-        <tbody>
-            @*@foreach (var row in ItemsPerFrameState)
-            {
-            <tr>
-            @foreach (var value in row.CurrentItems)
-            {
-            <td>@value</td>
-            }
-            </tr>
-            }*@
-            @for (int ctr = 0; ctr < Convert.ToInt32(SelectedFrameSizeOption); ctr++)
-            {
+    @if (ItemsPerFrameState.Count() > 0)
+    {
+        <table class="table" style="width:300px">
+            <thead>
                 <tr>
-                    @foreach (var value in ItemsPerFrameState.Select(x => x.CurrentItems.ElementAt(ctr)))
+                    @foreach (var column in ReferenceString.Split(','))
                     {
-                        <td>@value</td>
+                        <th>@column</th>
                     }
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @for (int ctr = 0; ctr < Convert.ToInt32(SelectedFrameSizeOption); ctr++)
+                {
+                    <tr>
+                        @foreach (var value in ItemsPerFrameState.Select(x => x.CurrentItems.ElementAt(ctr)))
+                        {
+                            <td>@value</td>
+                        }
+                    </tr>
+                }
+                <tr>
+                    @foreach (var value in ItemsPerFrameState.Select(x => x.IsPageFound))
+                    {
+                        @if (value == true)
+                        {
+                            <td style="color:green">GJETJE</td>
+                        }
+                        else
+                        {
+                            <td style="color:red">DESHTIM</td>
+                        }
+                    }
+                </tr>
+            </tbody>
+        </table>
+    }
 </div>
 
 @code {
@@ -98,6 +81,7 @@
     private string ReferenceString { get; set; }
     private string SelectedFrameSizeOption { get; set; }
 
+
     private void SetData()
     {
         RequestData.Payload.Add(new PageReplacementParameters
@@ -108,13 +92,6 @@
             });
     }
 
-    //private async Task ResetData()
-    //{
-    //    SelectedAlgorithm = (int)default(AlgorithmType);
-    //    ReferenceString = string.Empty;
-    //    SelectedFrameSizeOption = null;
-    //    RequestData = new RequestPayload() { Payload = new() };
-    //}
     private void BuildResults()
     {
         SetData();
@@ -126,9 +103,18 @@
                 item.CurrentItems.Add(-1);
             }
         }
+
         ItemsPerFrameState = response.FrameState;
     }
-
+    private void ResetData()
+    {
+        SelectedAlgorithm = (int)default(AlgorithmType);
+        ReferenceString = string.Empty;
+        RequestData = new RequestPayload() { Payload = new() };
+        PageFaultRates = new();
+        ItemsPerFrameState = new();
+        PageReplacementService = new();
+    }
 
 }
 <style>
@@ -151,7 +137,9 @@
     }
 
     th {
-        background-color: #f2f2f2;
+        font-weight: bold;
+        font-style: italic;
+        background-color: lightskyblue;
     }
 </style>
 

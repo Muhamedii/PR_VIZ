@@ -1,21 +1,18 @@
 ﻿@page "/simplechart"
 @using WebviewAppShared.Data.Models;
 @using WebviewAppShared.Data.Services;
-<h3>SimpleChart</h3>
+<h3>Performanca e algoritmeve - Krahasimi mes tyre</h3>
 
 
 <div class="container" style="display:flex">
-    @* <EditForm Model="formData" OnValidSubmit="GenerateGraph">
-
-    </EditForm>*@
     <div class="left-panel" style="width: 30%">
         <div class="form-group">
-            <Label For="referencestring">Enter pages sequence:</Label>
+            <Label For="referencestring">Shkruaj vargun e faqeve (te ndare me presje):</Label>
             <TextEdit @bind-Text="ReferenceString" id="referencestring" Class="form-control" Style="height: 25%" />
         </div>
 
         <div class="form-group">
-            <Label For="formData.">Select algorithm:</Label>
+            <Label For="formData.">Zgjdih nje algoritem:</Label>
             <Select TValue="int" @bind-SelectedValue="SelectedAlgorithm" id="selectedalgorithm" Class="form-control" Style="width: 70%;">
                 @foreach (var option in Enum.GetValues(typeof(AlgorithmType)))
                 {
@@ -25,7 +22,7 @@
         </div>
 
         <div class="form-group">
-            <Label For="framesizeoptions">Select 1 or more framesize options:</Label>
+            <Label For="framesizeoptions">Zgjidh nje apo me shume madhesi te kornizes memorike: </Label>
             <Select TValue="int" @bind-SelectedValues="SelectedFrameSizeOptions" Class="form-control" Style="width: 70%;" Multiple>
                 @for (int i = 1; i <= 10; i++)
                 {
@@ -36,14 +33,14 @@
         </div>
 
         <div class="form-group" style="display:flex;justify-content:space-between">
-            <button class="btn btn-primary" @onclick="GenerateGraph">Generate</button>
-            <button class="btn btn-secondary" @onclick="ResetData">Reset</button>
+            <button class="btn btn-primary" @onclick="GenerateGraph">Gjenero grafikun</button>
+            <button class="btn btn-secondary" @onclick="ResetData">Rivendos te dhenat</button>
         </div>
     </div>
 
     <div class="middle-panel" style="width: 75%">
         <div id="content">
-            <LineChart @ref="lineChart" TItem="int" />
+            <LineChart @ref="LineChart" TItem="int" />
         </div>
     </div>
 </div>
@@ -51,16 +48,16 @@
     @{
         foreach (var item in PageFaultRates)
         {
-            <p> For framesize @item.Key faultrate is: @item.Value %</p>
+            <p> Per kornizen memorike me madhesi @item.Key raporti i deshtimit te faqeve is: @item.Value %</p>
         }
     }
 </div>
 
 
 @code {
-    private LineChart<int> lineChart;
-    private PageReplacementService pageReplacementService = new();
-    private RequestPayload requestData = new RequestPayload() { Payload = new() };
+    private LineChart<int> LineChart;
+    private PageReplacementService PageReplacementService = new();
+    private RequestPayload RequestData = new RequestPayload() { Payload = new() };
     private Dictionary<int, decimal> PageFaultRates = new();
 
     private int SelectedAlgorithm { get; set; }
@@ -71,7 +68,7 @@
     {
         foreach (var frameSizeOption in SelectedFrameSizeOptions)
         {
-            requestData.Payload.Add(new PageReplacementParameters
+            RequestData.Payload.Add(new PageReplacementParameters
                 {
                     AlgorithmType = (AlgorithmType)SelectedAlgorithm,
                     Pages = !string.IsNullOrEmpty(ReferenceString) ? ReferenceString.Split(',').Select(x => Convert.ToInt32(x)).ToList() : new(),
@@ -85,27 +82,28 @@
         SelectedAlgorithm = (int)default(AlgorithmType);
         ReferenceString = string.Empty;
         SelectedFrameSizeOptions = null;
-        requestData = new RequestPayload() { Payload = new() };
-        await lineChart.Clear();
+        RequestData = new RequestPayload() { Payload = new() };
+
+        await LineChart.Clear();
     }
 
     private async Task GenerateGraph()
     {
         SetData();
-        var response = pageReplacementService.GetGeneratedResult(requestData);
+        var response = PageReplacementService.GetGeneratedResult(RequestData);
         var frameSizes = response.FrameSizePageFailRatioData.Select(x => x.Item2);
         var pageFaults = response.FrameSizePageFailRatioData.Select(x => x.Item1);
-        await lineChart.Clear();
+        await LineChart.Clear();
 
-        await lineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())), GetChartDataSet(pageFaults));
+        await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())), GetChartDataSet(pageFaults));
 
-        PageFaultRates = GetPageFaultRateData(requestData.Payload.First().Pages.Count, response.FrameSizePageFailRatioData.ToList());
+        PageFaultRates = GetPageFaultRateData(RequestData.Payload.First().Pages.Count, response.FrameSizePageFailRatioData.ToList());
     }
     private LineChartDataset<int> GetChartDataSet(IEnumerable<int> faults)
     {
         return new LineChartDataset<int>
             {
-                Label = "# of page faults",
+                Label = "# numri i deshtimeve te faqeve",
                 Data = faults.ToList(),
                 Fill = true,
                 PointRadius = 3,
