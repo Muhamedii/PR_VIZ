@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebviewAppShared.Data.Models;
 using WebviewAppShared.Data.Models.Lru;
 
@@ -7,6 +8,7 @@ namespace WebviewAppShared.Data.Services
 {
     public class LruService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         private Dictionary<int, LinkedListNode<Item>> Items = new();
         private LinkedList<Item> LrulinkedList = new();
 
@@ -36,6 +38,7 @@ namespace WebviewAppShared.Data.Services
                 ReArrange(linkedListNode);
 
                 hit = true;
+                ItemsInFrameState.Add((Items.Select(x => x.Key).ToList(), isPageFound: true));
             }
             else
             {
@@ -50,8 +53,9 @@ namespace WebviewAppShared.Data.Services
                 var newLinkedListNode = new LinkedListNode<Item>(newItem);
                 LrulinkedList.AddLast(newLinkedListNode);
                 Items[key] = newLinkedListNode;
+                ItemsInFrameState.Add((Items.Select(x=>x.Key).ToList(), isPageFound: true));
 
-               
+
             }
             return (hit, fault);
         }
@@ -80,6 +84,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }

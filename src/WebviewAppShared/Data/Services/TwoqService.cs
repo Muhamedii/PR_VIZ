@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebviewAppShared.Data.Models;
 
 namespace WebviewAppShared.Data.Services
 {
     public class TwoqService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         private LinkedList<int> Items { get; set; }
         private Dictionary<int, LinkedListNode<int>> PageAcceses { get; set; }
         private int ComplementaryFrameSize = 1;
-        private int _pageFaults = 0;
-        private int _pageHits = 0;
 
 
         public (bool hasHit, bool hasFault) Replace(int page)
@@ -24,6 +24,7 @@ namespace WebviewAppShared.Data.Services
                 Items.Remove(node);
                 Items.AddFirst(node);
                 hasHit = true;
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
             }
             else
             {
@@ -36,6 +37,7 @@ namespace WebviewAppShared.Data.Services
                 }
                 Items.AddFirst(page);
                 PageAcceses[page] = Items.First;
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
             }
 
             return (hasHit, hasFault);
@@ -82,6 +84,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }

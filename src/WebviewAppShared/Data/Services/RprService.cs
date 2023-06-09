@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebviewAppShared.Data.Models;
 
 namespace WebviewAppShared.Data.Services
 {
     public class RprService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         public List<int> Items { get; set; }
         private Random Randomizer;
         public (bool hasHit, bool hasFault) Replace(int page)
@@ -16,6 +18,7 @@ namespace WebviewAppShared.Data.Services
             if (Items.Contains(page))
             {
                 hasHit = true;
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
             }
             else
             {
@@ -29,6 +32,7 @@ namespace WebviewAppShared.Data.Services
                 {
                     Items.Add(page);
                 }
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
             }
             return (hasHit, hasFault);
         }
@@ -55,6 +59,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }

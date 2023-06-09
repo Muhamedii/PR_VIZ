@@ -8,6 +8,7 @@ namespace WebviewAppShared.Data.Services
 {
     public class LrukService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         private List<int> Items { get; set; }
         private Dictionary<int, int> PageAccesses { get; set; }
 
@@ -21,6 +22,7 @@ namespace WebviewAppShared.Data.Services
                 PageAccesses[page]++;
                 Items.Remove(page);
                 Items.Add(page);
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
             }
             else
             {
@@ -32,6 +34,7 @@ namespace WebviewAppShared.Data.Services
                     var leastAccessedPage = GetTheLeastAccessedPage();
                     PageAccesses.Remove(leastAccessedPage);
                     Items.Remove(leastAccessedPage);
+                    ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
                 }
                 Items.Add(page);
             }
@@ -61,6 +64,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }

@@ -7,6 +7,7 @@ namespace WebviewAppShared.Data.Services
 {
     public class NruService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         public HashSet<int> Items { get; set; }
 
         private (bool hasHit, bool hasFault) Replace(int page)
@@ -16,6 +17,7 @@ namespace WebviewAppShared.Data.Services
             if (Items.Contains(page))
             {
                 hasHit = true;
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
             }
             else
             {
@@ -26,10 +28,11 @@ namespace WebviewAppShared.Data.Services
                     Items.Remove(removeReference);
                 }
                 Items.Add(page);
+                ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
             }
             return (hasHit, hasFault);
         }
-        public Result GetResult(RequestPayload inputData)
+        public Result GetResult(RequestPayload inputData) 
         {
             Result result = new() { FrameSizePageFailRatioData = new(), RatioSummary = new() };
             foreach (var frameSizeOption in inputData.Payload)
@@ -51,6 +54,7 @@ namespace WebviewAppShared.Data.Services
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }

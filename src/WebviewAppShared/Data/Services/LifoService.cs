@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using WebviewAppShared.Data.Models;
 
 namespace WebviewAppShared.Data.Services
 {
     public class LifoService : PageReplacementParameters
     {
+        public List<(List<int>, bool isPageFound)> ItemsInFrameState { get; set; } = new();
         public Stack<int> Items { get; set; } = new();
         public void Add(int item)
         {
@@ -37,14 +39,20 @@ namespace WebviewAppShared.Data.Services
                     {
                         faults++;
                         Replace(page);
+                        ItemsInFrameState.Add((Items.ToList(), isPageFound: false));
                     }
                     else
+                    {
                         hits++;
+                        ItemsInFrameState.Add((Items.ToList(), isPageFound: true));
+                    }
+                        
                 }
                 result.FrameSizePageFailRatioData.Add(new Tuple<int, int>(faults, FrameSize));
                 result.RatioSummary.TotalFaults = faults;
                 result.RatioSummary.TotalHits = hits;
                 result.RatioSummary.PageFaultRatio = (faults * 100) / frameSizeOption.Pages.Count;
+                result.FrameState = ItemsInFrameState;
             }
             return result;
         }
