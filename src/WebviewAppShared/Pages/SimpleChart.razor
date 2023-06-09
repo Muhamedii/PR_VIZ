@@ -12,8 +12,8 @@
         </div>
 
         <div class="form-group">
-            <Label For="formData.">Zgjdih nje algoritem:</Label>
-            <Select TValue="int" @bind-SelectedValue="SelectedAlgorithm" id="selectedalgorithm" Class="form-control" Style="width: 70%;">
+            <Label For="formData.">Zgjidh nje apo dy algoritme algoritem:</Label>
+            <Select TValue="int" @bind-SelectedValues="SelectedAlgorithms" id="selectedalgorithm" Class="form-control" Style="width: 70%;" Multiple>
                 @foreach (var option in Enum.GetValues(typeof(AlgorithmType)))
                 {
                     <SelectItem Value="@option.GetHashCode()">@option</SelectItem>
@@ -48,7 +48,11 @@
     @{
         foreach (var item in PageFaultRates)
         {
-            <p> Per kornizen memorike me madhesi @item.Key raporti i deshtimit te faqeve is: @item.Value %</p>
+            <p> Per kornizen memorike me madhesi @item.Key ne @Enum.GetName(typeof(AlgorithmType),SelectedAlgorithms[0]) raporti i deshtimit te faqeve eshte: @item.Value %</p>
+        }
+        foreach (var item in PageFaultRatesSecondAlgorithm)
+        {
+            <p> Per kornizen memorike me madhesi @item.Key ne @Enum.GetName(typeof(AlgorithmType),SelectedAlgorithms[1]) raporti i deshtimit te faqeve eshte : @item.Value %</p>
         }
     }
 </div>
@@ -57,32 +61,39 @@
 @code {
     private LineChart<int> LineChart;
     private PageReplacementService PageReplacementService = new();
-    private RequestPayload RequestData = new RequestPayload() { Payload = new() };
+    private List<RequestPayload> RequestData = new();
     private Dictionary<int, decimal> PageFaultRates = new();
+    private Dictionary<int, decimal> PageFaultRatesSecondAlgorithm = new();
 
-    private int SelectedAlgorithm { get; set; }
+    private IReadOnlyList<int> SelectedAlgorithms { get; set; }
     private string ReferenceString { get; set; }
     private IReadOnlyList<int> SelectedFrameSizeOptions { get; set; }
 
     private void SetData()
     {
-        foreach (var frameSizeOption in SelectedFrameSizeOptions)
+        foreach (var selectedAlgorithm in SelectedAlgorithms)
         {
-            RequestData.Payload.Add(new PageReplacementParameters
-                {
-                    AlgorithmType = (AlgorithmType)SelectedAlgorithm,
-                    Pages = !string.IsNullOrEmpty(ReferenceString) ? ReferenceString.Split(',').Select(x => Convert.ToInt32(x)).ToList() : new(),
-                    FrameSize = frameSizeOption
-                });
+            var singleAlgorithmRequestData = new RequestPayload();
+
+            foreach (var frameSizeOption in SelectedFrameSizeOptions)
+            {
+                singleAlgorithmRequestData.Payload.Add(new PageReplacementParameters
+                    {
+                        AlgorithmType = (AlgorithmType)selectedAlgorithm,
+                        Pages = !string.IsNullOrEmpty(ReferenceString) ? ReferenceString.Split(',').Select(x => Convert.ToInt32(x)).ToList() : new(),
+                        FrameSize = frameSizeOption
+                    });
+            }
+            RequestData.Add(singleAlgorithmRequestData);
         }
     }
 
     private async Task ResetData()
     {
-        SelectedAlgorithm = (int)default(AlgorithmType);
+        SelectedAlgorithms = new int[] { (int)default(AlgorithmType) };
         ReferenceString = string.Empty;
         SelectedFrameSizeOptions = null;
-        RequestData = new RequestPayload() { Payload = new() };
+        RequestData = new();
 
         await LineChart.Clear();
     }
@@ -90,26 +101,47 @@
     private async Task GenerateGraph()
     {
         SetData();
-        var response = PageReplacementService.GetGeneratedResult(RequestData);
+        var response = PageReplacementService.GetGeneratedResult(RequestData[0]);
         var frameSizes = response.FrameSizePageFailRatioData.Select(x => x.Item2);
         var pageFaults = response.FrameSizePageFailRatioData.Select(x => x.Item1);
         await LineChart.Clear();
 
-        await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())), GetChartDataSet(pageFaults));
+        PageFaultRates = GetPageFaultRateData(RequestData[0].Payload.First().Pages.Count, response.FrameSizePageFailRatioData.ToList());
 
-        PageFaultRates = GetPageFaultRateData(RequestData.Payload.First().Pages.Count, response.FrameSizePageFailRatioData.ToList());
+        if (SelectedAlgorithms.Count == 2)
+        {
+            var responseSecondAlgorithm = PageReplacementService.GetGeneratedResult(RequestData[1]);
+            var pageFaultsSecondAlgorithm = responseSecondAlgorithm.FrameSizePageFailRatioData.Select(x => x.Item1);
+            PageFaultRatesSecondAlgorithm = GetPageFaultRateData(RequestData[1].Payload.First().Pages.Count, responseSecondAlgorithm.FrameSizePageFailRatioData.ToList());
+
+            await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())),
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[0], pageFaults, borderColor: "yellow", fill: true, bcgcolor: new[] { "rgba(255, 255, 0, 0.5)" }),
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[1], pageFaultsSecondAlgorithm, borderColor: "green", fill: true, bcgcolor: new[] { "rgba(0, 0, 255, 0.5)" })
+            );
+        }
+        else
+        {
+            
+
+            await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())),
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[0], pageFaults, borderColor: "yellow", fill: true, bcgcolor: new[] { "rgba(255, 255, 0, 0.5)" })
+            );
+        }
     }
-    private LineChartDataset<int> GetChartDataSet(IEnumerable<int> faults)
+    private LineChartDataset<int> GetChartDataSet(AlgorithmType algorithmType, IEnumerable<int> faults, string borderColor, object[] bcgcolor, bool fill)
     {
         return new LineChartDataset<int>
             {
-                Label = "# numri i deshtimeve te faqeve",
+                Label = $"# numri i deshtimeve te faqeve per {algorithmType.ToString()}",
                 Data = faults.ToList(),
-                Fill = true,
+                Fill = fill,
                 PointRadius = 3,
-                CubicInterpolationMode = "monotone"
+                CubicInterpolationMode = "monotone",
+                BorderColor = borderColor,
+                BackgroundColor = bcgcolor,
             };
     }
+
     private Dictionary<int, decimal> GetPageFaultRateData(int pagesCount, List<Tuple<int, int>> frameSizePageFaults)
     {
         var result = new Dictionary<int, decimal>();

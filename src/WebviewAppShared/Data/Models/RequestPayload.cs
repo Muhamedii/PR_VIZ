@@ -4,6 +4,6 @@ namespace WebviewAppShared.Data.Models
 {
     public class RequestPayload
     {
-        public List<PageReplacementParameters> Payload;
+        public List<PageReplacementParameters> Payload { get; set; } = new();
     }
 }
