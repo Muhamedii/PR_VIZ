@@ -116,7 +116,7 @@
 
             await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())),
                                                        GetChartDataSet((AlgorithmType)SelectedAlgorithms[0], pageFaults, borderColor: "yellow", fill: false, bcgcolor: new[] { "rgba(255, 255, 0, 0.5)" }),
-                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[1], pageFaultsSecondAlgorithm, borderColor: "green", fill: false, bcgcolor: new[] { "rgba(0, 0, 255, 0.5)" })
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[1], pageFaultsSecondAlgorithm, borderColor: "green", fill: false, bcgcolor: new[] { "rgba(0, 255, 0, 0.5)" })
             );
         }
         else

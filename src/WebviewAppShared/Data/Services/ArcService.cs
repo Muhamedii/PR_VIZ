@@ -28,7 +28,7 @@ namespace WebviewAppShared.Data.Services
                 if (list.Contains(key))
                 {
                     MoveToTop(ref FrequentlyAccessedItemsListTwo, key);
-                    hasFault = true;
+                    hasHit = true;
                 }
                 else
                 {
