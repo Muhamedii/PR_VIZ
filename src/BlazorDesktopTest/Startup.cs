@@ -2,19 +2,10 @@ using Blazorise;
 using Blazorise.Bootstrap;
 using Blazorise.Icons.FontAwesome;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WebviewAppShared.Data.Services;
-using WebviewAppTest;
-using WebviewAppTest.Data;
 
 namespace BlazorDesktopTest
 {
@@ -33,8 +24,6 @@ namespace BlazorDesktopTest
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
-            services.AddSingleton<WeatherForecastService>();
-            services.AddSingleton<AppState>();
             services
                     .AddBlazorise(options =>
                     {
@@ -42,7 +31,6 @@ namespace BlazorDesktopTest
                     })
                     .AddBootstrapProviders()
                     .AddFontAwesomeIcons();
-            services.AddTransient<LifoService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

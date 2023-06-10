@@ -68,6 +68,11 @@
                 </tr>
             </tbody>
         </table>
+        <div class="container">
+            <p>Gjetje: <b style="color:green">@TotalHits</b></p>
+            <p>Deshtime: <b style="color:red">@TotalFaults</b></p>
+            <p>Perqindja e deshtimit: <b>@FaultRate%</b></p>
+        </div>
     }
 </div>
 
@@ -81,7 +86,9 @@
     private string ReferenceString { get; set; }
     private string SelectedFrameSizeOption { get; set; }
 
-
+    private int TotalHits { get; set; }
+    private int TotalFaults { get; set; }
+    private decimal FaultRate { get; set; }
     private void SetData()
     {
         RequestData.Payload.Add(new PageReplacementParameters
@@ -105,6 +112,9 @@
         }
 
         ItemsPerFrameState = response.FrameState;
+        TotalHits = response.RatioSummary.TotalHits;
+        TotalFaults = response.RatioSummary.TotalFaults;
+        FaultRate = Math.Round((decimal)(response.FrameSizePageFailRatioData.First().Item1 * 100) / RequestData.Payload.First().Pages.Count(), 2);
     }
     private void ResetData()
     {
@@ -113,6 +123,8 @@
         RequestData = new RequestPayload() { Payload = new() };
         PageFaultRates = new();
         ItemsPerFrameState = new();
+        TotalFaults = 0;
+        TotalHits = 0;
         PageReplacementService = new();
     }
 

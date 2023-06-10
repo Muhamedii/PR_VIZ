@@ -53,7 +53,7 @@ namespace WebviewAppShared.Data.Services
                 var newLinkedListNode = new LinkedListNode<Item>(newItem);
                 LrulinkedList.AddLast(newLinkedListNode);
                 Items[key] = newLinkedListNode;
-                ItemsInFrameState.Add((Items.Select(x=>x.Key).ToList(), isPageFound: true));
+                ItemsInFrameState.Add((Items.Select(x=>x.Key).ToList(), isPageFound: false));
 
 
             }

@@ -1,4 +1,4 @@
-﻿@page "/simplechart"
+﻿@page "/chart-comparison"
 @using WebviewAppShared.Data.Models;
 @using WebviewAppShared.Data.Services;
 <h3>Performanca e algoritmeve - Krahasimi mes tyre</h3>
@@ -115,8 +115,8 @@
             PageFaultRatesSecondAlgorithm = GetPageFaultRateData(RequestData[1].Payload.First().Pages.Count, responseSecondAlgorithm.FrameSizePageFailRatioData.ToList());
 
             await LineChart.AddLabelsDatasetsAndUpdate(Enumerable.ToArray<string>(frameSizes.Select(x => x.ToString())),
-                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[0], pageFaults, borderColor: "yellow", fill: true, bcgcolor: new[] { "rgba(255, 255, 0, 0.5)" }),
-                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[1], pageFaultsSecondAlgorithm, borderColor: "green", fill: true, bcgcolor: new[] { "rgba(0, 0, 255, 0.5)" })
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[0], pageFaults, borderColor: "yellow", fill: false, bcgcolor: new[] { "rgba(255, 255, 0, 0.5)" }),
+                                                       GetChartDataSet((AlgorithmType)SelectedAlgorithms[1], pageFaultsSecondAlgorithm, borderColor: "green", fill: false, bcgcolor: new[] { "rgba(0, 0, 255, 0.5)" })
             );
         }
         else
